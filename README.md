@@ -3,5 +3,6 @@
 Here is a list of games including the old 70's arcade games
 
 
-
-![](https://gitlab.com/Linuxious/2d-games/-/blob/master/Pong.mp4)
+<h1 align="center">
+  <vid src="Pong.mp4" alt="Roll Through The Ages The Bronze Age" />
+</h1>
