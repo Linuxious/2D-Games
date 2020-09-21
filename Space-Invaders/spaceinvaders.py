@@ -133,8 +133,7 @@ class Main:
                 keys = pygame.mouse.get_pressed()
                 if wait == 5:
                     if keys[0] == 1:
-                        bullets.append([turret_pos[0] + self.turret.get_width() // 2 - 10,y])
-                        bullets.append([turret_pos[0] + self.turret.get_width() // 2 + 10,y])
+                        bullets.append([turret_pos[0] + self.turret.get_width() // 2,y])
                 if len(bullets) != 0:
                     for bullet in bullets:
                         bullet[1] -= 5
