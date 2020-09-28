@@ -250,9 +250,9 @@ def check_event(player=(player2_locations, player2_ships, player2_health, attack
                                         shots.append((x,y))
                                         hits.append((255,255,255))
                                         miss = False
-                                    if game_mode != 1:
-                                        pygame.draw.rect(screen, hits[len(hits) - 1], (shots[len(shots) - 1][0], shots[len(shots) - 1][1], 20,20))
-                                        change_player()
+                if game_mode != 1:
+                    pygame.draw.rect(screen, hits[len(hits) - 1], (shots[len(shots) - 1][0] + 1, shots[len(shots) - 1][1] + 1, 18,18))
+                    change_player()
     for health in player[1]:
         if health in player[2]:
             index = player[2][health]
@@ -274,7 +274,7 @@ def place_ships(player=(player1_locations, player1_ships, player1_health)):
         index = player[0].index(ship)
         count = list(player[1])[index]
         for location in ship:
-            pygame.draw.rect(screen, (0,255,0), (location[0], location[1], 20,20))
+            pygame.draw.rect(screen, (0,255,0), (location[0] + 1, location[1] + 1, 18,18))
 
 def collide(rect):
     if rect.collidepoint(pygame.mouse.get_pos()):
@@ -282,6 +282,7 @@ def collide(rect):
         if pygame.mouse.get_pressed()[0]:
             return True
 def change_player():
+    pygame.mouse.set_visible(True)
     pygame.display.update()
     change = True
     switch_player = font.render("Switching Player", 1, (255,0,0))
@@ -355,15 +356,17 @@ while menu_break:
         screen.blit(menu_pic, (0,0))
         screen.blit(player_surface, player_rect)
         screen.blit(attack_surface, attack_rect)
+        pygame.mouse.set_visible(False)
         if len(shots) != 0:
             for shot in shots:
                 index = shots.index(shot)
-                pygame.draw.rect(screen, hits[index], (shot[0],shot[1],20,20))
+                pygame.draw.rect(screen, hits[index], (shot[0] + 1,shot[1] + 1,18,18))
 
         if game_mode == 1:
             place_ships()
             if current_player == 1:
                 check_event()
+                draw_lines(attack_rect)
             else:
                 ai()
                 current_player = 1
@@ -386,6 +389,7 @@ while menu_break:
         pygame.time.Clock().tick(10)
 
     while end_game:
+        pygame.mouse.set_visible(True)
         win = font.render("Winner: " + winner, 1, (255,0,0))
         screen.blit(menu_pic, (0,0))
         for event in pygame.event.get():
@@ -414,6 +418,8 @@ while menu_break:
             player2_health = player2_ships.copy()
             player2_directions = []
             player2_locations = []
+            next_shot = []
+            shot = (random.randrange(player_rect.x, player_rect.x + player_rect.width, 20), random.randrange(player_rect.y, player_rect.y + player_rect.height, 20))
         if collide(button_rect_no):
             end_game = False
             menu_break = False
