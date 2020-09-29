@@ -41,12 +41,6 @@ current_player = 1
 winner = None
 shots = []
 hits = []
-player1_health = player1_ships.copy()
-player1_directions = []
-player1_locations = []
-player2_health = player2_ships.copy()
-player2_directions = []
-player2_locations = []
 
 # End Game
 end = end_font.render("Game Over", 1, (255,0,0))
@@ -109,13 +103,20 @@ def ai():
             player1_health[ship_index] -= 1
             if len(next_shot) == 0:
                 next_shot = ship.copy()
+                next_shot.remove(shot)
             else:
                 del next_shot[0]
             ai_miss = False
+    for health in player1_ships:
+        if health in player1_health:
+            index = player1_health[health]
+            if index <= 0:
+                del player1_health[health]
     if ai_miss:
         shots.append(shot)
         hits.append((255,255,255))
     if len(player1_health) == 0:
+        print("Debug")
         winner = "Computer"
         battle_ship = False
         end_game = True
@@ -141,86 +142,53 @@ def draw_lines(surface):
         x2 = surface.x
     if pygame.mouse.get_pos()[1] < surface.y:
         y2 = surface.y
-    pygame.draw.line(screen, (255,0,0), (x2, y1), (x2,y2), 2)
-    pygame.draw.line(screen, (255,0,0), (x2, y1 + surface.height), (x2,y2), 2)
-    pygame.draw.line(screen, (255,0,0), (x1, y2), (x2,y2), 2)
-    pygame.draw.line(screen, (255,0,0), (x1  + surface.width,y2), (x2,y2), 2)
+    pygame.draw.line(screen, (255,0,0), (x2, y1), (x2,y1 + surface.height), 2)
+    pygame.draw.line(screen, (255,0,0), (x1, y2), (x1 + surface.width,y2), 2)
 
 
-def start_game(surface, surface2):
-    for ship in player1_ships:
-        size = player1_ships[ship]
-        direction = random.choice(directions)
-        locationx = random.randrange(20 + size * 20,surface.get_width() + 1 - size * 20,20)
-        locationy = random.randrange(20 + size * 20,surface.get_height() + 1 - size * 20,20)
-        locations = []
-        if len(player1_locations) != 0:
-            for location in player1_locations:
+def start_game():
+    player=(player1_ships, player1_locations, player_rect)
+    for player_change in range(2):
+        if player_change == 1:
+            player=(player2_ships, player2_locations, attack_rect)
+        for ship in player[0]:
+            size = player[0][ship]
+            direction = random.choice(directions)
+            locationx = random.randrange(player[2].x + size * 20,player[2].x + player[2].width + 1 - size * 20,20)
+            locationy = random.randrange(player[2].y + size * 20,player[2].y + player[2].height + 1 - size * 20,20)
+            locations = []
+            if len(player[1]) != 0:
+                for location in player[1]:
+                    for x in range(size):
+                        while (locationx + x * 20 + 20,locationy) in location:
+                            locationx -= size * 20 - 20
+                    for x in range(size):
+                        while (locationx - x * 20 - 20,locationy) in location:
+                            locationx += size * 20 + 20
+                    for x in range(size):
+                        while (locationx,locationy + x * 20 + 20) in location:
+                            locationy -= size * 20 - 20
+                    for x in range(size):
+                        while (locationx,locationy - x * 20 - 20) in location:
+                            locationy += size * 20 + 20
+            if direction == "up":
                 for x in range(size):
-                    while (locationx + x * 20,locationy) in location:
-                        locationx -= size * 20 - 20
+                    locations.append((locationx, locationy + x * 20))
+            elif direction == "down":
                 for x in range(size):
-                    while (locationx - x * 20,locationy) in location:
-                        locationx += size * 20 + 20
+                    locations.append((locationx, locationy - x * 20))
+            elif direction == "left":
                 for x in range(size):
-                    while (locationx,locationy + x * 20) in location:
-                        locationy -= size * 20 - 20
+                    locations.append((locationx - x * 20, locationy))
+            elif direction == "right":
                 for x in range(size):
-                    while (locationx,locationy - x * 20) in location:
-                        locationy += size * 20 + 20
-        if direction == "up":
-            for x in range(size):
-                locations.append((locationx, locationy + x * 20))
-        elif direction == "down":
-            for x in range(size):
-                locations.append((locationx, locationy - x * 20))
-        elif direction == "left":
-            for x in range(size):
-                locations.append((locationx - x * 20, locationy))
-        elif direction == "right":
-            for x in range(size):
-                locations.append((locationx + x * 20, locationy))
-        player1_locations.append(locations)
-        player1_directions.append(direction)
-    for ship in player2_ships:
-        size = player2_ships[ship]
-        direction = random.choice(directions)
-        locationx = random.randrange(attack_rect.x + size * 20,attack_rect.x + surface2.get_width() + 1 - size * 20,20)
-        locationy = random.randrange(attack_rect.y + size * 20,attack_rect.y + surface2.get_height() + 1 - size * 20,20)
-        locations = []
-        if len(player2_locations) != 0:
-            for location in player2_locations:
-                for x in range(size):
-                    while (locationx + x * 20,locationy) in location:
-                        locationx -= size * 20 - 20
-                for x in range(size):
-                    while (locationx - x * 20,locationy) in location:
-                        locationx += size * 20 + 20
-                for x in range(size):
-                    while (locationx,locationy + x * 20) in location:
-                        locationy -= size * 20 - 20
-                for x in range(size):
-                    while (locationx,locationy - x * 20) in location:
-                        locationy += size * 20 + 20
-        if direction == "up":
-            for x in range(size):
-                locations.append((locationx, locationy + x * 20))
-        elif direction == "down":
-            for x in range(size):
-                locations.append((locationx, locationy - x * 20))
-        elif direction == "left":
-            for x in range(size):
-                locations.append((locationx - x * 20, locationy))
-        elif direction == "right":
-            for x in range(size):
-                locations.append((locationx + x * 20, locationy))
-        player2_locations.append(locations)
-        player2_directions.append(direction)
-
+                    locations.append((locationx + x * 20, locationy))
+            player[1].append(locations)
 
 def check_event(player=(player2_locations, player2_ships, player2_health, attack_rect)):
     global winner,current_player,battle_ship,end_game
     miss = True
+    pause = True
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             pygame.quit()
@@ -250,9 +218,16 @@ def check_event(player=(player2_locations, player2_ships, player2_health, attack
                                         shots.append((x,y))
                                         hits.append((255,255,255))
                                         miss = False
-                if game_mode != 1:
-                    pygame.draw.rect(screen, hits[len(hits) - 1], (shots[len(shots) - 1][0] + 1, shots[len(shots) - 1][1] + 1, 18,18))
-                    change_player()
+                                    if game_mode != 1:
+                                        if len(shots) != 0:
+                                            for shot in shots:
+                                                index = shots.index(shot)
+                                                pygame.draw.rect(screen, hits[index], (shot[0] + 1,shot[1] + 1,18,18))
+                                        if pause:
+                                            change_player()
+                                            pause = False
+
+    print(shots)
     for health in player[1]:
         if health in player[2]:
             index = player[2][health]
@@ -261,10 +236,12 @@ def check_event(player=(player2_locations, player2_ships, player2_health, attack
 
 
     if len(player[2]) == 0:
+        print(len(player[2]))
         if player[0] == player1_locations:
             winner = "Player 2"
         else:
             winner = "Player 1"
+            print("Debug1")
         battle_ship = False
         end_game = True
 
@@ -281,6 +258,7 @@ def collide(rect):
         pygame.draw.rect(screen, (0,255,0), rect, 25)
         if pygame.mouse.get_pressed()[0]:
             return True
+
 def change_player():
     pygame.mouse.set_visible(True)
     pygame.display.update()
@@ -336,12 +314,12 @@ while menu_break:
     screen.blit(banner, banner_rect)
 
     if collide(button_rect_first_player):
-        start_game(player_surface, attack_surface)
+        start_game()
         pygame.mixer.music.stop()
         menu_break = False
         battle_ship = True
     if collide(button_rect_second_player):
-        start_game(player_surface, attack_surface)
+        start_game()
         pygame.mixer.music.stop()
         game_mode = 2
         menu_break = False
@@ -356,17 +334,16 @@ while menu_break:
         screen.blit(menu_pic, (0,0))
         screen.blit(player_surface, player_rect)
         screen.blit(attack_surface, attack_rect)
-        pygame.mouse.set_visible(False)
-        if len(shots) != 0:
-            for shot in shots:
-                index = shots.index(shot)
-                pygame.draw.rect(screen, hits[index], (shot[0] + 1,shot[1] + 1,18,18))
+        #pygame.mouse.set_visible(False)
+        player_surface.fill((0,0,255))
+        attack_surface.fill((0,0,255))
+        draw_grid(player_surface)
+        draw_grid(attack_surface)
 
         if game_mode == 1:
             place_ships()
             if current_player == 1:
                 check_event()
-                draw_lines(attack_rect)
             else:
                 ai()
                 current_player = 1
@@ -374,19 +351,23 @@ while menu_break:
             if current_player == 1:
                 place_ships()
                 check_event()
-                draw_lines(attack_rect)
             else:
                 place_ships(player=(player2_locations, player2_ships, player2_health))
                 check_event(player=(player1_locations, player1_ships, player1_health, player_rect))
-                draw_lines(player_rect)
 
-
-        player_surface.fill((0,0,255))
-        attack_surface.fill((0,0,255))
-        draw_grid(player_surface)
-        draw_grid(attack_surface)
+        if len(shots) != 0:
+            for shot in shots:
+                index = shots.index(shot)
+                pygame.draw.rect(screen, hits[index], (shot[0] + 1,shot[1] + 1,18,18))
+        if current_player == 1:
+            draw_lines(attack_rect)
+        else:
+            draw_lines(player_rect)
         pygame.display.update()
         pygame.time.Clock().tick(10)
+
+
+
 
     while end_game:
         pygame.mouse.set_visible(True)
@@ -420,6 +401,7 @@ while menu_break:
             player2_locations = []
             next_shot = []
             shot = (random.randrange(player_rect.x, player_rect.x + player_rect.width, 20), random.randrange(player_rect.y, player_rect.y + player_rect.height, 20))
+            print(len(player2_health))
         if collide(button_rect_no):
             end_game = False
             menu_break = False
